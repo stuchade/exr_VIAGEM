@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>Parcel Test</title>
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			height: 100%;
+		}
+
+		#map {
+			width: 100%;
+			height: 100%;
+		}
+
+		#info {
+			position: absolute;
+			top: 20px;
+			right: 20px;
+			z-index: 1000;
+			background: white;
+			padding: 15px;
+			width: 300px;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+		}
+
+		path:focus, 
+        g:focus {
+            outline: none;
+        }
+	</style>
+</head>
+
+<body>
+
+	<div id="map"></div>
+
+	<div id="info">
+		Click a parcel
+	</div>
+
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+	<script>
+		const map = L.map('map').setView([50.43520784966147, 15.368800382294596], 17);
+
+		L.tileLayer(
+			'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+			{
+				attribution: '&copy; OpenStreetMap contributors'
+			}
+		).addTo(map);
+
+		let selectedLayer = null;
+
+
+		async function loadParcels() {
+			try {
+				const response = await fetch('api.php?action=parcels');
+
+				if (!response.ok) {
+					throw new Error('HTTP error ' + response.status);
+				}
+
+				const geojson = await response.json();
+
+				console.log('Parcels received:', geojson);
+
+				const parcelsLayer = L.geoJSON(geojson, {
+					style: {
+						color: 'red',
+						weight: 3,
+						fillColor: 'transparent',
+						fillOpacity: 0.5
+					},
+
+					onEachFeature: function (feature, layer) {
+						layer.bindTooltip(
+							'Parcel ' + feature.properties.label
+						);
+
+						layer.on('click', function () {
+							const parcelId = feature.properties.gml_id || feature.properties.id;
+
+							if (selectedLayer) {
+								parcelsLayer.resetStyle(selectedLayer);
+							}
+
+							selectedLayer = layer;
+
+							layer.setStyle({
+								color: '#0055ff',
+								fillColor: '#00aaff',
+								fillOpacity: 0.8
+							});
+							loadParcel(parcelId);
+						});
+					}
+				}).addTo(map);
+
+
+			} catch (error) {
+				console.error('Could not load parcels:', error);
+
+				document.getElementById('info').innerHTML =
+					'<b>Error loading parcels:</b><br>' + error.message;
+			}
+		}
+
+		async function loadParcel(id) {
+
+			const response = await fetch(
+				'api.php?action=parcel&id=' + encodeURIComponent(id)
+			);
+
+			const parcel = await response.json();
+
+			document.getElementById('info').innerHTML = `
+        <h3>Parcel ${parcel.parcelNumber}</h3>
+        <p>Area: ${parcel.area} m²</p>
+        <p>Type: ${parcel.landType}</p>
+        <p>Cadastral area: ${parcel.cadastralArea}</p>
+        <button onclick="loadOwner('${parcel.ownerId}')">
+            Show owner
+        </button>
+    `;
+		}
+
+		async function loadOwner(id) {
+			const response = await fetch(
+				'api.php?action=owner&id=' + encodeURIComponent(id)
+			);
+
+			const owner = await response.json();
+
+			document.getElementById('info').innerHTML += `
+        <hr>
+        <h3>Owner</h3>
+        <p>${owner.name}</p>
+        <p>${owner.address}</p>
+    `;
+		}
+
+		loadParcels();
+	</script>
+
+</body>
+
+</html>
