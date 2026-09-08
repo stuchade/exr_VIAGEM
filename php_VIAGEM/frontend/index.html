@@ -60,6 +60,7 @@
 		).addTo(map);
 
 		let selectedLayer = null;
+		let selectedOwner = false;
 
 
 		async function loadParcels() {
@@ -122,34 +123,35 @@
 			);
 
 			const parcel = await response.json();
+			selectedOwner = false;
 
 			document.getElementById('info').innerHTML = `
-        <h3>Parcelní číslo: ${parcel.parcelNumber}</h3>
-        <p>Výměra: ${parcel.area} m²</p>
-        <p>Druh pozemku: ${parcel.landType}</p>
-        <p>Katastrální území: ${parcel.cadastralArea}</p>
-        
-    `;
+				<h3>Parcelní číslo: ${parcel.parcelNumber}</h3>
+				<p>Výměra: ${parcel.area} m²</p>
+				<p>Druh pozemku: ${parcel.landType}</p>
+				<p>Katastrální území: ${parcel.cadastralArea}</p>
+				<button onclick="loadOwner('${parcel.ownerId}')">
+					Ukázat majitele
+				</button>
+			`;
 		}
-/**
-<button onclick="loadOwner('${parcel.ownerId}')">
-            Show owner
-        </button>
+
 		async function loadOwner(id) {
 			const response = await fetch(
 				'api.php?action=owner&id=' + encodeURIComponent(id)
 			);
 
 			const owner = await response.json();
-
-			document.getElementById('info').innerHTML += `
-        <hr>
-        <h3>Owner</h3>
-        <p>${owner.name}</p>
-        <p>${owner.address}</p>
-    `;
+			if (!selectedOwner) {
+				document.getElementById('info').innerHTML += `
+					<h3>Majitel</h3>
+					<p>${owner.name}</p>
+					<p>${owner.address}</p>
+				`;
+				selectedOwner = true;
+			}
+			
 		}
-**/
 		loadParcels();
 	</script>
 

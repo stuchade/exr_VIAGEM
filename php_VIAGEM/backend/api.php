@@ -68,4 +68,22 @@ if ($action === 'parcel') {
 	send_json(['error' => 'Parcel not found'], 404);
 }
 
+if ($action === 'owner') {
+	$owners = [
+		'owner-001' => [
+			'id' => 'owner-001',
+			'name' => 'Katastrální úřad / Ukázkový vlastník',
+			'address' => 'Czech Republic'
+		]
+	];
+
+	$id = $_GET['id'] ?? null;
+
+	if (isset($owners[$id])) {
+		send_json($owners[$id]);
+	}
+
+	send_json(['error' => 'Owner not found'], 404);
+}
+
 send_json(['error' => 'Unknown action'], 404);
