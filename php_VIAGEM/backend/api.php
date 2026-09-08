@@ -10,19 +10,33 @@ function send_json($data, int $status = 200): never {
 
 $action = $_GET['action'] ?? '';
 
-$geojsonPath = 'Jicin.geojson';
+$geojsonFiles = [
+	'Jicin.geojson',
+	'Kopidlno.geojson',
+	'Liban.geojson',
+	'Nova_Paka.geojson'
+];
 
-if (!file_exists($geojsonPath)) {
-	send_json(['error'=> 'GeoJSON file not found'], 500);
+$combinedGeoJSON = [
+	'type' => 'FeatureCollection',
+	'features' => []
+];
+
+foreach ($geojsonFiles as $file) {
+	if (file_exists($file)) {
+		$geojsonContent = file_get_contents($file);
+		$geojson = json_decode($geojsonContent, true);
+
+		if (isset($geojson['features']) && is_array($geojson['features'])) {
+			$combinedGeoJSON['features'] = array_merge($combinedGeoJSON['features'], $geojson['features']);
+		}
+	}
 }
 
-$geojsonContent = file_get_contents($geojsonPath);
-$geojson = json_decode($geojsonContent, true);
-
-$features = $geojson['features'] ?? [];
+$features = $combinedGeoJSON['features'];
 
 if ($action === 'parcels') {
-	send_json($geojson);
+	send_json($combinedGeoJSON);
 }
 
 
@@ -34,12 +48,15 @@ if ($action === 'parcel') {
 
 		$featureId = $props['gml_id'] ?? null;
 
-		if ($featureId === $id || $props['gml_id'] === $id) {
+		if ($featureId === $id) {
 			$parcelDetail = [
 				'id' => $featureId,
 				'parcelNumber'=> $props['label'] ?? 'Neznámé',
 				'area' => $props['areaValue'] ?? 0,
-				'cadastralArea' => 'Jičín (k.ú. kód: '. ($props['nationalCadastralReference'] ?? 'neuvedeno') . ')',
+				'cadastralArea' => (str_starts_with($props['nationalCadastralReference'], '659541') ? 'Jičín (659541)' : 
+									(str_starts_with($props['nationalCadastralReference'], '669296') ? 'Kopidlno (669296)' : 
+									(str_starts_with($props['nationalCadastralReference'], '681679') ? 'Libáň (681679)' :
+									(str_starts_with($props['nationalCadastralReference'], '705128') ? 'Nová Paka (705128)' : '-')))),
 				'landType' => (str_starts_with($props['label'] ?? '', 'st.') ? 'zastavěná plocha / stavební parcela' : 'pozemková parcela'),
 				'ownerId' => 'owner-001'
 
@@ -50,25 +67,5 @@ if ($action === 'parcel') {
 
 	send_json(['error' => 'Parcel not found'], 404);
 }
-
-
-if ($action === 'owner') {
-	$owners = [
-		'owner-001' => [
-			'id' => 'owner-001',
-			'name' => 'Katastrální úřad / Ukázkový vlastník',
-			'address' => 'Jičín, Czech Republic'
-		]
-	];
-
-	$id = $_GET['id'] ?? null;
-
-	if (isset($owners[$id])) {
-		send_json($owners[$id]);
-	}
-
-	send_json(['error' => 'Owner not found'], 404);
-}
-
 
 send_json(['error' => 'Unknown action'], 404);

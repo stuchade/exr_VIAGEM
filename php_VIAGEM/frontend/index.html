@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>Parcel Test</title>
+	<title>test_parcels_Jicin</title>
 
 	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
@@ -24,10 +24,12 @@
 			top: 20px;
 			right: 20px;
 			z-index: 1000;
-			background: white;
-			padding: 15px;
+			background: rgb(245, 242, 242);
+			padding: 20px;
 			width: 300px;
 			box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+			border: 2px solid black;
+			border-radius: 8px;
 		}
 
 		path:focus, 
@@ -42,7 +44,7 @@
 	<div id="map"></div>
 
 	<div id="info">
-		Click a parcel
+		Click a parcel for info
 	</div>
 
 	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -75,9 +77,9 @@
 				const parcelsLayer = L.geoJSON(geojson, {
 					style: {
 						color: 'red',
-						weight: 3,
+						weight: 1,
 						fillColor: 'transparent',
-						fillOpacity: 0.5
+						fillOpacity: 0.5,
 					},
 
 					onEachFeature: function (feature, layer) {
@@ -95,9 +97,9 @@
 							selectedLayer = layer;
 
 							layer.setStyle({
-								color: '#0055ff',
-								fillColor: '#00aaff',
-								fillOpacity: 0.8
+								color: 'black',
+								fillColor: 'gray',
+								fillOpacity: 0.5
 							});
 							loadParcel(parcelId);
 						});
@@ -122,16 +124,17 @@
 			const parcel = await response.json();
 
 			document.getElementById('info').innerHTML = `
-        <h3>Parcel ${parcel.parcelNumber}</h3>
-        <p>Area: ${parcel.area} m²</p>
-        <p>Type: ${parcel.landType}</p>
-        <p>Cadastral area: ${parcel.cadastralArea}</p>
-        <button onclick="loadOwner('${parcel.ownerId}')">
-            Show owner
-        </button>
+        <h3>Parcelní číslo: ${parcel.parcelNumber}</h3>
+        <p>Výměra: ${parcel.area} m²</p>
+        <p>Druh pozemku: ${parcel.landType}</p>
+        <p>Katastrální území: ${parcel.cadastralArea}</p>
+        
     `;
 		}
-
+/**
+<button onclick="loadOwner('${parcel.ownerId}')">
+            Show owner
+        </button>
 		async function loadOwner(id) {
 			const response = await fetch(
 				'api.php?action=owner&id=' + encodeURIComponent(id)
@@ -146,7 +149,7 @@
         <p>${owner.address}</p>
     `;
 		}
-
+**/
 		loadParcels();
 	</script>
 
