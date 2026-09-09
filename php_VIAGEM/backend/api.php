@@ -39,11 +39,19 @@ if ($action === 'parcels') {
 	send_json($combinedGeoJSON);
 }
 
+$parcelID = [];
+foreach ($combinedGeoJSON['features'] as $feature) {
+	$id = $feature['properties']['gml_id'] ?? null;
+	if ($id) {
+		$parcelID[$id] = $feature;
+	}
+}
 
 if ($action === 'parcel') {
 	$id = $_GET['id'] ?? null;
 
-	foreach ($features as $feature) {
+	if (isset($parcelID[$id])) {
+		$feature = $parcelID[$id];
 		$props = $feature['properties'] ?? [];
 
 		$featureId = $props['gml_id'] ?? null;
