@@ -1,0 +1,20 @@
+## Zápisník ##
+
+Začátek byl náročný, protože – jak jsem zmínila na pohovoru – s PHP ani s tvorbou serveru jsem do té 
+doby neměla zkušenosti. Úvodní nastavení (router.php a základní kostru api.php či index.html) jsem proto 
+konzultovala se známým, který mi pomohl se v tom zorientovat.
+
+Dalším krokem bylo rozhodnutí, jakým způsobem přistoupit ke zdrojovým datům parcel. Zvolila jsem předem 
+stažená data, což bylo pro mě v dané chvíli praktičtější, i když s více časem bych se ráda pustila do 
+live stahování. Narazila jsem ale na to, že soubory jsou poměrně objemné a mapa se kvůli tomu mírně sekala.
+Pokusila jsem se data zjednodušit a zoptimalizovat v QGISu, což pomohlo jen částečně.
+
+Během vývoje jsem musela upravit i logiku v api.php. Původně jsem při každém kliknutí na parcelu procházela
+všechna data lineárně, což aplikaci zbytečně zpomalovalo. Problém jsem vyřešila tak, že si data načtu 
+a indexuji hned na začátku, a pak už dohledávám konkrétní parcely přímo podle jejich ID.
+
+Uvědomuji si, že aplikace občas vykazuje menší prodlevy, ale snažila jsem se v rámci svých dosavadních 
+možností výkon maximálně optimalizovat.
+
+Nakonec se mi podařilo úspěšně zprovoznit funkční aplikaci, která nad rámec povinného minima pokrývá 
+katastrální území Jičína, Nové Paky, Libáně a Kopidlna.
