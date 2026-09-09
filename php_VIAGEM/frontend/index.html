@@ -84,10 +84,12 @@
 					},
 
 					onEachFeature: function (feature, layer) {
+						// při najetí myšítkem
 						layer.bindTooltip(
 							'Parcel ' + feature.properties.label
 						);
 
+						// při kliknutí
 						layer.on('click', function () {
 							const parcelId = feature.properties.gml_id || feature.properties.id;
 
@@ -97,11 +99,14 @@
 
 							selectedLayer = layer;
 
+							// zbarvení nakliknuté parceli
 							layer.setStyle({
 								color: 'black',
 								fillColor: 'gray',
 								fillOpacity: 0.5
 							});
+
+							// zobrazení info
 							loadParcel(parcelId);
 						});
 					}

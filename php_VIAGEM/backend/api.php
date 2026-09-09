@@ -22,6 +22,8 @@ $combinedGeoJSON = [
 	'features' => []
 ];
 
+
+// Sjednocení souborů geoJSON
 foreach ($geojsonFiles as $file) {
 	if (file_exists($file)) {
 		$geojsonContent = file_get_contents($file);
@@ -39,6 +41,7 @@ if ($action === 'parcels') {
 	send_json($combinedGeoJSON);
 }
 
+// načtení features předem do parcelID, pro rychlejší hledání
 $parcelID = [];
 foreach ($combinedGeoJSON['features'] as $feature) {
 	$id = $feature['properties']['gml_id'] ?? null;
@@ -47,6 +50,7 @@ foreach ($combinedGeoJSON['features'] as $feature) {
 	}
 }
 
+// načtení informací o pracele
 if ($action === 'parcel') {
 	$id = $_GET['id'] ?? null;
 
@@ -76,6 +80,7 @@ if ($action === 'parcel') {
 	send_json(['error' => 'Parcel not found'], 404);
 }
 
+// načtení informací o vlatníkovi
 if ($action === 'owner') {
 	$owners = [
 		'owner-001' => [
